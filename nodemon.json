@@ -1,0 +1,6 @@
+{
+    "watch" : ["server.js", "src/"],
+    "ext" : "ts",
+    "IS_TS_NODE":"true",
+    "exec" : "ts-node -r tsconfig-paths/register src/main.ts"
+}
