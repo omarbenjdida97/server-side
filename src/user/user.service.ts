@@ -3,12 +3,14 @@ import { CreateUserDto } from '@app/user/dto/create-user.dto';
 import { UserEntity } from '@app/user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { sign } from 'jsonwebtoken';
+import { sign, verify } from 'jsonwebtoken';
+
 import { JWT_SECRET } from '@app/config';
 import { UserResponseInterface } from '@app/user/types/userResponse.interface';
 import { LoginUserDto } from '@app/user/dto/loginUser.dto';
 import { compare } from 'bcrypt';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserI } from './entities/user.interface';
 @Injectable()
 export class UserService {
   constructor(
@@ -31,6 +33,7 @@ export class UserService {
     }
     const newUser = new UserEntity();
     Object.assign(newUser, createUserDto);
+    newUser.image = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
     console.log(newUser);
     return await this.userRepository.save(newUser);
   }
@@ -110,5 +113,33 @@ export class UserService {
 
   findById(id: number): Promise<UserEntity> {
     return this.userRepository.findOne(id);
+  }
+
+  async currentUser(token: string): Promise<UserEntity | null> {
+    try {
+      const decodedToken = verify(token, JWT_SECRET) as UserI;
+      const user = await this.userRepository.findOne(decodedToken.id);
+      return user;
+    } catch (error) {
+      return null;
+    }
+  }
+  async markEmailAsConfirmed(email: string) {
+    return this.userRepository.update(
+      { email },
+      {
+        isEmailConfirmed: true,
+      },
+    );
+  }
+  async getByEmail(email: string) {
+    const user = await this.userRepository.findOne({ email });
+    if (user) {
+      return user;
+    }
+    throw new HttpException(
+      'User with this email does not exist',
+      HttpStatus.NOT_FOUND,
+    );
   }
 }

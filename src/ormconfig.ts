@@ -1,7 +1,9 @@
 /* eslint-disable prettier/prettier */
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const AdminUser = require('nestjs-admin').AdminUserEntity
+
 import { ConnectionOptions } from 'typeorm';
+
 
 const config: ConnectionOptions = {
   type: 'postgres',

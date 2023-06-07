@@ -20,6 +20,8 @@ import { AdsResponseInterface } from './types/adsResponse.interface';
 import { BackendValidationPipe } from '@app/shared/pipes/backendValidation.pipe';
 import { CommentsRO } from './commentInt.interface';
 import { CreateCommentDto } from './dto/createComment.dto';
+import { EmailConfirmationGuard } from '@app/email/emailConfirmation.guard';
+import { AdEntity } from './ad.entity';
 
 @Controller('ads')
 export class AdController {
@@ -111,5 +113,13 @@ export class AdController {
   async deleteComment(@Param() params) {
     const { slug, id } = params;
     return await this.adService.deleteComment(slug, id);
+  }
+
+  @Get()
+  async getUsersNearby(
+    @Query('latitude') latitude: number,
+    @Query('longitude') longitude: number,
+  ): Promise<AdsResponseInterface> {
+    return await this.adService.findAll(latitude, longitude);
   }
 }

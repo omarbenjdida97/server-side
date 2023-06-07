@@ -23,7 +23,7 @@ export class AdEntity {
   @Column({ default: '' })
   title: string;
 
-  @Column('simple-array')
+  @Column('text', { array: true, default: '{}' })
   type: string[];
 
   @Column({ default: 0 })
@@ -38,22 +38,36 @@ export class AdEntity {
   @Column({ default: '' })
   aboutAuthor: string;
 
+  @Column('decimal', { precision: 6, scale: 4, default: 0.0, nullable: true })
+  latitude: number;
+
+  @Column('decimal', { precision: 6, scale: 4, default: 0.0, nullable: true })
+  longitude: number;
+
   @Column('simple-array')
   requiredSkills: string[];
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    nullable: true,
+  })
   createdAt: Date;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    nullable: true,
+  })
   updatedAt: Date;
 
   @Column('text', { array: true, default: '{}' })
   tagList: string[];
 
-  @Column({ default: 0 })
+  @Column({ default: 0, nullable: true })
   reccCount: number;
 
-  @Column({ default: 0 })
+  @Column({ default: 0, nullable: true })
   studentNumber: number;
 
   @BeforeUpdate()

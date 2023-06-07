@@ -16,9 +16,14 @@ import { UserEntity } from '@app/user/entities/user.entity';
 import { AuthGuard } from '@app/guards/auth.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { BackendValidationPipe } from '@app/shared/pipes/backendValidation.pipe';
+import { EmailConfirmationService } from '@app/email/emailConfirmation.service';
+import { EmailConfirmationGuard } from '@app/email/emailConfirmation.guard';
 @Controller()
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly emailConfirmationService: EmailConfirmationService,
+  ) {}
 
   @Post('users')
   @UsePipes(new BackendValidationPipe())
@@ -26,6 +31,9 @@ export class UserController {
     @Body('user') createUserDto: CreateUserDto,
   ): Promise<UserResponseInterface> {
     const user = await this.userService.createUser(createUserDto);
+    await this.emailConfirmationService.sendVerificationLink(
+      createUserDto.email,
+    );
     return this.userService.buildUserResponse(user);
   }
 

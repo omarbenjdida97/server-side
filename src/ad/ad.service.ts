@@ -32,6 +32,48 @@ export class AdService {
       const tags = query.tags.split(',');
       queryBuilder.where('ads.tagList && ARRAY[:...tags]', { tags });
     }
+    if (query.latitude && query.longitude) {
+      const latitude = query.latitude;
+      const longitude = query.longitude;
+      const radiusInKm = 30;
+      queryBuilder.where(
+        `
+        2 * 6371 * ASIN(
+          SQRT(
+            POWER(SIN(RADIANS(ads.latitude - :latitude) / 2), 2) +
+            COS(RADIANS(:latitude)) * COS(RADIANS(ads.latitude)) *
+            POWER(SIN(RADIANS(ads.longitude - :longitude) / 2), 2)
+          )
+        )
+      <= :radius
+      `,
+        { latitude, longitude, radius: radiusInKm },
+      );
+    }
+    if (query.latitude && query.longitude && query.tags) {
+      const tags = query.tags.split(',');
+      const latitude = query.latitude;
+      const longitude = query.longitude;
+      const radiusInKm = 30;
+      queryBuilder.where(
+        `
+        2 * 6371 * ASIN(
+          SQRT(
+            POWER(SIN(RADIANS(ads.latitude - :latitude) / 2), 2) +
+            COS(RADIANS(:latitude)) * COS(RADIANS(ads.latitude)) *
+            POWER(SIN(RADIANS(ads.longitude - :longitude) / 2), 2)
+          )
+        )
+      <= :radius
+      AND ads.tagList && ARRAY[:...tags]
+      `,
+        { latitude, longitude, radius: radiusInKm, tags },
+      );
+    }
+    if (query.type) {
+      const types = query.type.split(',');
+      queryBuilder.where('ads.type && ARRAY[:...types]', { types });
+    }
     if (query.author) {
       const author = await this.userRepository.findOne({
         username: query.author,
@@ -40,6 +82,13 @@ export class AdService {
       queryBuilder.andWhere('ads.authorId = :id', {
         id: author.id,
       });
+    }
+    if (query.tags && query.type) {
+      const types = query.type.split(',');
+      const tags = query.tags.split(',');
+      queryBuilder
+        .where('ads.type && ARRAY[:...types]', { types })
+        .andWhere('ads.tagList && ARRAY[:...tags]', { tags });
     }
 
     if (query.authorId) {
@@ -232,5 +281,28 @@ export class AdService {
 
     Object.assign(ad, updateAdDto);
     return await this.adRepository.save(ad);
+  }
+
+  async getUsersNearby(latitude: number, longitude: number) {
+    const radiusInKm = 30;
+    console.log(latitude, longitude);
+    const ads = await this.adRepository
+      .createQueryBuilder('ad')
+      .where(
+        `
+        2 * 6371 * ASIN(
+          SQRT(
+            POWER(SIN(RADIANS(ad.latitude - :latitude) / 2), 2) +
+            COS(RADIANS(:latitude)) * COS(RADIANS(ad.latitude)) *
+            POWER(SIN(RADIANS(ad.longitude - :longitude) / 2), 2)
+          )
+        )
+      ) <= :radius
+      `,
+        { latitude, longitude, radius: radiusInKm },
+      )
+      .getMany();
+
+    return ads;
   }
 }

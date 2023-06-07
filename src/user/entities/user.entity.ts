@@ -10,6 +10,7 @@ import {
 import { hash } from 'bcrypt';
 import { AdEntity } from '@app/ad/ad.entity';
 import { Comment } from '@app/ad/comment.entity';
+
 @Entity({ name: 'users' })
 export class UserEntity {
   @PrimaryGeneratedColumn()
@@ -18,6 +19,8 @@ export class UserEntity {
   username: string;
   @Column()
   email: string;
+  @Column({ default: false })
+  public isEmailConfirmed: boolean;
   @Column({ default: '' })
   bio: string;
   @Column({ default: '' })

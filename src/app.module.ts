@@ -9,6 +9,7 @@ import ormconfig from '@app/ormconfig';
 import { AuthMiddleware } from '@app/user/middlewares/auth.middleware';
 import { AdModule } from '@app/ad/ad.module';
 import { DefaultAdminModule } from 'nestjs-admin';
+import { EmailModule } from './email/email.module';
 @Module({
   imports: [
     TagModule,
@@ -16,6 +17,7 @@ import { DefaultAdminModule } from 'nestjs-admin';
     UserModule,
     AdModule,
     DefaultAdminModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

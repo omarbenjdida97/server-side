@@ -6,16 +6,26 @@ import { UserEntity } from '@app/user/entities/user.entity';
 import { AuthGuard } from '@app/guards/auth.guard';
 import { DefaultAdminModule, DefaultAdminSite } from 'nestjs-admin';
 import { UserAdmin } from './user.admin';
+import { EmailConfirmationService } from '@app/email/emailConfirmation.service';
+import EmailService from '@app/email/email.service';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [TypeOrmModule.forFeature([UserEntity]), DefaultAdminModule],
   controllers: [UserController],
-  providers: [UserService, AuthGuard],
+  providers: [
+    UserService,
+    AuthGuard,
+    EmailConfirmationService,
+    EmailService,
+    JwtService,
+    ConfigService,
+  ],
   exports: [UserService, TypeOrmModule],
 })
 export class UserModule {
   constructor(private readonly adminSite: DefaultAdminSite) {
-    // Register the User entity under the "User" section
     adminSite.register('User', UserAdmin);
   }
 }
